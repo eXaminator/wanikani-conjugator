@@ -56,7 +56,7 @@ const router = createBrowserRouter([
         id: 'root',
         element: <RootRoute />,
         loader: async () => {
-            const token = JSON.parse(window.localStorage.getItem('apiKey') ?? '');
+            const token = JSON.parse(window.localStorage.getItem('apiKey') ?? '""');
             if (!token) return [];
             try {
                 return await loadAllSubjects(token);

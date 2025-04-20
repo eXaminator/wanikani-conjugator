@@ -1,0 +1,4 @@
+node_modules/
+.quodo/
+.vscode/
+build.sh

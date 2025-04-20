@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from 'react';
+import { type Dispatch, type SetStateAction, useCallback, useState } from 'react';
 
 export default function usePersistedState<T>(key: string, defaultValue: T): [T, Dispatch<SetStateAction<T>>] {
     const [state, setState] = useState(() => {
