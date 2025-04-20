@@ -32,6 +32,7 @@ const miscSettingNames = {
     showVerbTransitivity: 'Show verb transitivity',
     showVerbType: 'Show verb type',
     playAudio: 'Play audio',
+    skipCorrectSolution: 'Korrekte Antworten automatisch überspringen',
 };
 
 const iconMap = {
@@ -116,6 +117,7 @@ export default function VerbConjugator() {
         showVerbTransitivity: true,
         showVerbType: true,
         playAudio: true,
+        skipCorrectSolution: true,
     });
     const streak = useStreak();
 
@@ -219,6 +221,7 @@ export default function VerbConjugator() {
                 onNext={setRandom}
                 onCorrect={handleCorrect}
                 onMistake={handleIncorrect}
+                nextOnCheck={miscSettings.skipCorrectSolution === true}
             />
         </>
     );

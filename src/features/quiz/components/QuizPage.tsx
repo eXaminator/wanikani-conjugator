@@ -45,14 +45,14 @@ export default function QuizPage() {
 
             <div className="mb-8">
                 <h2 className="text-xl mb-4">Quiz Type:</h2>
-                <div className="grid grid-cols-3 gap-3">
-                    <Button onClick={() => setQuizType('adjective-type')} primary={quizType === 'adjective-type'}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Button onClick={() => setQuizType('adjective-type')} primary={quizType === 'adjective-type'} className="min-h-20">
                         Adjective Type Quiz (な/の/noun)
                     </Button>
-                    <Button onClick={() => setQuizType('verb-ending')} primary={quizType === 'verb-ending'}>
+                    <Button onClick={() => setQuizType('verb-ending')} primary={quizType === 'verb-ending'} className="min-h-20">
                         Verb Ending Quiz (Ichidan/Godan)
                     </Button>
-                    <Button onClick={() => setQuizType('verb-transitivity')} primary={quizType === 'verb-transitivity'}>
+                    <Button onClick={() => setQuizType('verb-transitivity')} primary={quizType === 'verb-transitivity'} className="min-h-20">
                         Verb Transitivity Quiz
                     </Button>
                 </div>

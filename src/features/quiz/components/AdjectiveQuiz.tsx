@@ -11,7 +11,7 @@ export default function AdjectiveQuiz(props: QuizProps) {
 
     const { currentPosition, currentSubject, score, maxPosition, handleAnswer } = useQuiz({
         wordCount,
-        filter: subject => subject.data.parts_of_speech.some(pos => ['adjective', 'noun', 'い adjective', 'な adjective', 'の adjective'].includes(pos)),
+        filter: subject => subject.data.parts_of_speech.some(pos => ['noun', 'な adjective', 'の adjective'].includes(pos)),
         onFinish,
         checkAnswer: (answer, subject) => {
             const isNaAdj = subject.data.parts_of_speech.includes('な adjective');

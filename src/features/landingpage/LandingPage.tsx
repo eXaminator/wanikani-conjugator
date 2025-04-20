@@ -13,8 +13,6 @@ export default function LandingPage() {
     }, [revalidator, setApiKey]);
 
     return (
-        <div>
-            <Input label="Wanikani API-Key" value={apiKey} onChange={handleApiKeyUpdate} className="w-xs" />
-        </div>
+        <Input label="Wanikani API-Key" value={apiKey} onChange={handleApiKeyUpdate} className="w-xs" />
     );
 }

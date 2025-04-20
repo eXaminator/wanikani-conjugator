@@ -1,5 +1,5 @@
 import Input from '@shared/components/Input';
-import type { Subject } from '@shared/types/types';
+import type { PartOfSpeech, Subject } from '@shared/types/types';
 import { useMemo, useState } from 'react';
 import { useRouteLoaderData } from 'react-router';
 
@@ -7,7 +7,7 @@ export default function VocabListPage() {
     const subjects = useRouteLoaderData('root') as Subject[];
 
     const [sortBy, setSortBy] = useState<string>('kanji');
-    const [onlyType, setOnlyType] = useState<string>('');
+    const [onlyType, setOnlyType] = useState<PartOfSpeech | null>(null);
     const [onlyHiragana, setOnlyHiragana] = useState(false);
 
     const metaSubjects = useMemo(() => {
@@ -53,7 +53,7 @@ export default function VocabListPage() {
                     }
                 }
                 return acc;
-            }, [] as string[])
+            }, [] as PartOfSpeech[])
             .sort();
     }, [subjects]);
 
@@ -72,8 +72,8 @@ export default function VocabListPage() {
                     </label>
                     <select
                         id="type-select"
-                        value={onlyType}
-                        onChange={(e) => setOnlyType(e.target.value)}
+                        value={onlyType ?? ''}
+                        onChange={(e) => setOnlyType((e.target.value as PartOfSpeech) || null)}
                         className="rounded border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
                         <option value="">Alle</option>

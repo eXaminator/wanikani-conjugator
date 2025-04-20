@@ -43,9 +43,14 @@ export default function QuestionCard({
         setState('unchecked');
     }, []);
 
+    const showInput = useCallback(() => {
+        setTimeout(() => input.current?.scrollIntoView({ behavior: 'smooth' }), 300);
+    }, []);
+
     const gotoNext = useCallback(() => {
         if (input.current) {
             input.current.value = '';
+            input.current.focus();
         }
 
         resetState();
@@ -120,7 +125,8 @@ export default function QuestionCard({
                     type="text"
                     lang="ja"
                     onChange={resetState}
-                    readOnly={state === 'correct'}
+                    readOnly={state !== 'unchecked'}
+                    onFocus={showInput}
                 />
                 <Button onClick={gotoNext} type="button">
                     Next

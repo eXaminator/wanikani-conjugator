@@ -18,4 +18,7 @@ export default defineConfig({
             '@features': fileURLToPath(new URL('./src/features', import.meta.url)),
         },
     },
+    server: {
+        host: '0.0.0.0',
+    },
 });
