@@ -1,3 +1,5 @@
+export type PartOfSpeech = 'adjective' | 'counter' | 'expression' | 'godan verb' | 'ichidan verb' | 'in compounds' | 'independent noun' | 'interjection' | 'intransitive verb' | 'noun' | 'numeral' | 'prefix' | 'pronoun' | 'proper noun' | 'suffix' | 'transitive verb' | 'verbal noun' | 'い adjective' | 'する verb' | 'な adjective' | 'の adjective';
+
 export type Subject = {
     id: number;
     object: string;
@@ -12,7 +14,7 @@ export type Subject = {
             reading: string;
             primary: boolean;
         }>;
-        parts_of_speech: string[];
+        parts_of_speech: PartOfSpeech[];
         lesson_position: number;
         pronunciation_audios: {
             url: string;

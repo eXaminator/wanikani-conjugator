@@ -1,13 +1,12 @@
 import Button from '@shared/components/Button';
-import type { Subject } from '@shared/types/types';
 import { useState } from 'react';
-import { useRouteLoaderData } from 'react-router';
-import Quiz from './Quiz';
+import AdjectiveQuiz from './AdjectiveQuiz';
+import VerbEndingQuiz from './VerbEndingQuiz';
+import VerbTransitivityQuiz from './VerbTransitivityQuiz';
 
 type QuizType = 'adjective-type' | 'verb-ending' | 'verb-transitivity';
 
 export default function QuizPage() {
-    const subjects = useRouteLoaderData('root') as Subject[];
     const [quizType, setQuizType] = useState<QuizType | null>(null);
     const [wordCount, setWordCount] = useState(30);
     const [isQuizActive, setIsQuizActive] = useState(false);
@@ -27,7 +26,15 @@ export default function QuizPage() {
         return (
             <div className="container mx-auto p-4">
                 <h1 className="text-2xl font-bold mb-4">Quiz in Progress</h1>
-                <Quiz subjects={subjects} quizType={quizType} wordCount={wordCount} onFinish={handleQuizFinish} />
+                {quizType === "adjective-type" ? (
+                    <AdjectiveQuiz wordCount={wordCount} onFinish={handleQuizFinish} />
+                ) : null}
+                {quizType === "verb-ending" ? (
+                    <VerbEndingQuiz wordCount={wordCount} onFinish={handleQuizFinish} />
+                ) : null}
+                {quizType === "verb-transitivity" ? (
+                    <VerbTransitivityQuiz wordCount={wordCount} onFinish={handleQuizFinish} />
+                ) : null}
             </div>
         );
     }
