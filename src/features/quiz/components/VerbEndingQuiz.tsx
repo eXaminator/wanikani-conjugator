@@ -9,15 +9,17 @@ interface QuizProps {
 export default function VerbEndingQuiz(props: QuizProps) {
     const { wordCount, onFinish } = props;
 
-    const { currentPosition, currentSubject, score, maxPosition, handleAnswer } = useQuiz({
+    const { currentSubject, quizCardProps } = useQuiz({
         wordCount,
-        filter: subject => subject.data.parts_of_speech.some(pos => pos.includes('verb') && subject.data.characters.endsWith('る')),
+        filter: subject => subject.data.parts_of_speech.some(pos => ['godan verb', 'ichidan verb', 'intransitive verb', 'transitive verb', 'する verb'].includes(pos) && subject.data.characters.endsWith('る')),
+        answers: { ichidan: 'Ichidan', godan: 'Godan', special: 'Special' },
         onFinish,
-        checkAnswer: (answer, subject) => {
+        getAnswer: (subject) => {
             const isIchidan = subject.data.parts_of_speech.includes('ichidan verb');
-            if (answer === 'ichidan' && isIchidan) return true;
-            if (answer === 'godan' && !isIchidan) return true;
-            return isIchidan ? 'Ichidan' : 'Godan';
+            const isGodan = subject.data.parts_of_speech.includes('godan verb');
+            if (isIchidan) return 'ichidan';
+            if (isGodan) return 'godan';
+            return 'special';
         }
     });
 
@@ -27,13 +29,8 @@ export default function VerbEndingQuiz(props: QuizProps) {
 
     return (
         <QuizCard
-            question={currentSubject.data.characters}
-            onAnswer={handleAnswer}
+            {...quizCardProps}
             onFinish={onFinish}
-            answers={{ ichidan: 'Ichidan', godan: 'Godan' }}
-            score={score}
-            maxPosition={maxPosition}
-            currentPosition={currentPosition}
         />
     );
 }

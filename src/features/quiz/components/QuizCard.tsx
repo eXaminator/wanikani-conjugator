@@ -18,6 +18,13 @@ type Props = {
     icons?: { icon: string; tooltip: string }[];
 };
 
+const answerCols: Record<string, string> = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-2',
+    3: 'grid-cols-3',
+    4: 'grid-cols-4',
+};
+
 export default function QuizCard(props: Props) {
     const { onAnswer, onFinish, question, answers, hint, tags, icons, currentPosition, maxPosition, score } = props;
     const input = useRef<HTMLInputElement>(null);
@@ -35,6 +42,10 @@ export default function QuizCard(props: Props) {
         event.preventDefault();
         onAnswer(input.current?.value.replace(/n$/g, 'ん') ?? '');
     }, [onAnswer]);
+
+    const answerCount = Object.values(answers ?? {}).length || 1;
+    const maxAnswerPerRows = Object.values(answerCols).length;
+    const answersColClass = answerCols[String(Math.min(answerCount, maxAnswerPerRows))];
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto flex flex-col items-stretch">
@@ -79,7 +90,7 @@ export default function QuizCard(props: Props) {
                         {hint}
                     </p>
                 ) : null}
-                <div className={`grid gap-3 grid-cols-${Object.values(answers ?? {}).length || 1}`}>
+                <div className={`grid gap-3 ${answersColClass}`}>
                     {answers ? (
                         Object.entries(answers).map(([key, value]) => (
                             <Button

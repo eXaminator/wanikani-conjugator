@@ -9,15 +9,19 @@ interface QuizProps {
 export default function VerbTransitivityQuiz(props: QuizProps) {
     const { wordCount, onFinish } = props;
 
-    const { currentPosition, currentSubject, score, maxPosition, handleAnswer } = useQuiz({
+    const { currentSubject, quizCardProps } = useQuiz({
         wordCount,
-        filter: subject => subject.data.parts_of_speech.some(pos => pos.includes('verb')),
+        filter: subject => subject.data.parts_of_speech.some(pos => ['transitive verb', 'intransitive verb'].includes(pos)),
+        answers: { transitive: 'Transitive', intransitive: 'Intransitive', both: 'Both' },
         onFinish,
-        checkAnswer: (answer, subject) => {
+        getAnswer: (subject) => {
             const isTransitive = subject.data.parts_of_speech.includes('transitive verb');
-            if (answer === 'transitive' && isTransitive) return true;
-            if (answer === 'intransitive' && !isTransitive) return true;
-            return isTransitive ? 'Transitive' : 'Intransitive';
+            const isIntransitive = subject.data.parts_of_speech.includes('transitive verb');
+            const isBoth = isTransitive && isIntransitive;
+
+            if (isBoth) return 'both';
+            if (isTransitive) return 'transitive';
+            return 'intransitive';
         }
     });
 
@@ -27,13 +31,8 @@ export default function VerbTransitivityQuiz(props: QuizProps) {
 
     return (
         <QuizCard
-            question={currentSubject.data.characters}
-            onAnswer={handleAnswer}
+            {...quizCardProps}
             onFinish={onFinish}
-            answers={{ transitive: 'Transitive', intransitive: 'Intransitive' }}
-            score={score}
-            maxPosition={maxPosition}
-            currentPosition={currentPosition}
         />
     );
 }

@@ -1,42 +1,56 @@
 import type { PartOfSpeech, Subject } from "@/shared/types/types";
 import useRandomSubjects from "./useRandomSubjects";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ComponentProps } from "react";
 import { useToast } from "@/shared/components/ToastContext";
+import type QuizCard from "../components/QuizCard";
 
-type Options = {
+type Options<Answers> = {
     wordCount: number,
     filter?: Parameters<typeof useRandomSubjects>[1],
-    checkAnswer: (answer: string, subject: Subject) => boolean | string,
+    getAnswer: (subject: Subject) => keyof Answers,
     onFinish?: () => void,
+    answers: Answers,
 };
 
-export default function useQuiz(options: Options) {
-    const { filter, wordCount, checkAnswer, onFinish } = options;
+type WrongAnswer = {
+    answer: string,
+    expectedAnswer: string,
+};
+
+export default function useQuiz<Answers extends Record<string, string>>(options: Options<Answers>) {
+    const { filter, wordCount, getAnswer, onFinish, answers } = options;
     const [score, setScore] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(0);
     const subjects = useRandomSubjects(wordCount, filter);
     const { showToast } = useToast();
+    const [wrongAnswers, setWrongAnswers] = useState<WrongAnswer[]>([]);
 
     const currentSubject = subjects[currentIndex];
 
     return {
-        score,
-        maxPosition: subjects.length,
-        currentPosition: currentIndex + 1,
         currentSubject,
         isFinished: currentIndex >= subjects.length,
-        handleAnswer: useCallback((answer: string) => {
-            const result = checkAnswer(answer, currentSubject);
-            if (result === true) {
-                showToast('Correct!', 'success');
-                setCurrentIndex(i => i + 1);
-                setScore(p => p + 1);
-            } else {
-                showToast(`Incorrect. It's a ${result}.`, 'error');
-                setCurrentIndex(i => i + 1);
-            }
+        wrongAnswers,
+        quizCardProps: {
+            onAnswer: useCallback((answer: string) => {
+                const expectedAnswer = String(getAnswer(currentSubject));
+                if (expectedAnswer === answer) {
+                    showToast('Correct!', 'success');
+                    setCurrentIndex(i => i + 1);
+                    setScore(p => p + 1);
+                } else {
+                    showToast(`Incorrect. It's a ${expectedAnswer}.`, 'error');
+                    setCurrentIndex(i => i + 1);
+                    setWrongAnswers(a => [...a, { answer, expectedAnswer }]);
+                }
 
-            if ((currentIndex + 1) >= subjects.length) onFinish?.();
-        }, [showToast, currentIndex, subjects.length, onFinish, checkAnswer, currentSubject]),
+                if ((currentIndex + 1) >= subjects.length) onFinish?.();
+            }, [showToast, currentIndex, subjects.length, onFinish, getAnswer, currentSubject]),
+            answers,
+            question: currentSubject?.data.characters,
+            score,
+            maxPosition: subjects.length,
+            currentPosition: currentIndex + 1,
+        } as Pick<ComponentProps<typeof QuizCard>, "answers" | "onAnswer" | "question" | "score" | "maxPosition" | "currentPosition">,
     };
 }
