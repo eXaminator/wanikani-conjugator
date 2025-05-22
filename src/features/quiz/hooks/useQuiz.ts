@@ -1,12 +1,12 @@
 import type { PartOfSpeech, Subject } from "@/shared/types/types";
-import useRandomSubjects from "./useRandomSubjects";
 import { useCallback, useMemo, useState, type ComponentProps } from "react";
 import { useToast } from "@/shared/components/ToastContext";
 import type QuizCard from "../components/QuizCard";
+import useRandomSubjects from "@/shared/hooks/useRandomSubjects";
 
 type Options<Answers> = {
     wordCount: number,
-    filter?: Parameters<typeof useRandomSubjects>[1],
+    filter?: NonNullable<Parameters<typeof useRandomSubjects>[0]>['filter'],
     getAnswer: (subject: Subject) => keyof Answers,
     onFinish?: () => void,
     answers: Answers,
@@ -21,7 +21,10 @@ export default function useQuiz<Answers extends Record<string, string>>(options:
     const { filter, wordCount, getAnswer, onFinish, answers } = options;
     const [score, setScore] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const subjects = useRandomSubjects(wordCount, filter);
+    const subjects = useRandomSubjects({
+        amount: wordCount,
+        filter,
+    });
     const { showToast } = useToast();
     const [wrongAnswers, setWrongAnswers] = useState<WrongAnswer[]>([]);
 

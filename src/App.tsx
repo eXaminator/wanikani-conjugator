@@ -6,6 +6,7 @@ import type { Subject } from '@shared/types/types';
 import { RouterProvider, createBrowserRouter } from 'react-router';
 import RootRoute from './RootRoute';
 import LandingPage from './features/landingpage/LandingPage';
+import ListeningPage from './features/listening/components/ListeningPage';
 
 interface Assignment {
     data: {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
             {
                 path: 'quiz',
                 element: <QuizPage />,
+            },
+            {
+                path: 'listening',
+                element: <ListeningPage />,
             },
         ],
     },

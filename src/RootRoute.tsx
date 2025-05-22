@@ -20,6 +20,9 @@ export default function RootRoute() {
                         <li>
                             <NavLink to="/quiz">Quiz</NavLink>
                         </li>
+                        <li>
+                            <NavLink to="/listening">Listening</NavLink>
+                        </li>
                     </ul>
                 </nav>
             </div>
