@@ -22,10 +22,16 @@ const conjugationContexts: Record<string, string[]> = {
     casual_negative: ['🧢 casual', '❌ negative', '⌚️ present'],
     casual_past: ['🧢 casual', '✅ affirmative', '🕰️ past'],
     casual_pastNegative: ['🧢 casual', '❌ negative', '🕰️ past'],
+    casual_potential: ['🧢 casual', '💪 potential', '✅ affirmative'],
+    casual_potential_negative: ['🧢 casual', '💪 potential', '❌ negative'],
+    casual_volitional: ['🧢 casual', '🎯 volitional', '✅ affirmative'],
     polite_present: ['🎩 polite', '✅ affirmative', '⌚️ present'],
     polite_negative: ['🎩 polite', '❌ negative', '⌚️ present'],
     polite_past: ['🎩 polite', '✅ affirmative', '🕰️ past'],
     polite_pastNegative: ['🎩 polite', '❌ negative', '🕰️ past'],
+    polite_potential: ['🎩 polite', '💪 potential', '✅ affirmative'],
+    polite_potential_negative: ['🎩 polite', '💪 potential', '❌ negative'],
+    polite_volitional: ['🎩 polite', '🎯 volitional', '✅ affirmative'],
 };
 
 const miscSettingNames = {
@@ -57,10 +63,16 @@ function getForms(verb: Subject): Record<keyof typeof conjugationContexts, strin
         casual_negative: conjugateAuxiliaries(verbString, [], 'Negative', isIchidan)[1],
         casual_past: conjugateAuxiliaries(verbString, [], 'Ta', isIchidan)[0],
         casual_pastNegative: conjugateAuxiliaries(verbString, ['Nai'], 'Ta', isIchidan)[0],
+        casual_potential: conjugateAuxiliaries(verbString, ['ReruRareru'], 'Dictionary', isIchidan)[0],
+        casual_potential_negative: conjugateAuxiliaries(verbString, ['ReruRareru'], 'Negative', isIchidan)[1],
+        casual_volitional: conjugateAuxiliaries(verbString, [], 'Volitional', isIchidan)[0],
         polite_present: conjugateAuxiliaries(verbString, ['Masu'], 'Dictionary', isIchidan)[0],
         polite_negative: conjugateAuxiliaries(verbString, ['Masu'], 'Negative', isIchidan)[0],
         polite_past: conjugateAuxiliaries(verbString, ['Masu'], 'Ta', isIchidan)[0],
         polite_pastNegative: conjugateAuxiliaries(verbString, ['Masu'], 'Negative', isIchidan)[1],
+        polite_potential: conjugateAuxiliaries(verbString, ['ReruRareru', 'Masu'], 'Dictionary', isIchidan)[0],
+        polite_potential_negative: conjugateAuxiliaries(verbString, ['ReruRareru', 'Masu'], 'Negative', isIchidan)[1],
+        polite_volitional: conjugateAuxiliaries(verbString, ['Masu'], 'Volitional', isIchidan)[0],
     };
 }
 
