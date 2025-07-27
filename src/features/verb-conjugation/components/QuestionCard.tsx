@@ -6,7 +6,7 @@ import Input from '../../../shared/components/Input';
 
 type Props = {
     question: string;
-    answer: string;
+    answers: string[];
     tags?: string[];
     icons?: { icon: string; tooltip: string }[];
     hint?: string;
@@ -22,13 +22,14 @@ export default function QuestionCard({
     tags,
     icons,
     nextOnCheck = false,
-    answer,
+    answers,
     onNext,
     onCorrect,
     onMistake,
 }: Props) {
     const input = useRef<HTMLInputElement>(null);
     const [state, setState] = useState<'unchecked' | 'correct' | 'incorrect'>('unchecked');
+    const [userAnswer, setUserAnswer] = useState<string>('');
 
     useEffect(() => {
         if (input.current) {
@@ -41,6 +42,7 @@ export default function QuestionCard({
 
     const resetState = useCallback(() => {
         setState('unchecked');
+        setUserAnswer('');
     }, []);
 
     const showInput = useCallback(() => {
@@ -67,7 +69,26 @@ export default function QuestionCard({
                 return;
             }
 
-            if (answer === input.current?.value.replace(/n$/g, 'ん')) {
+            const userInput = input.current?.value.replace(/n$/g, 'ん') || '';
+
+            // Check if any answer is an error (starts with [Error:)
+            const hasError = answers.some(answer => answer.startsWith('[Error:'));
+
+            if (hasError) {
+                // For error cases, treat any input as correct to allow training to continue
+                setUserAnswer(userInput || 'skipped');
+                onCorrect?.();
+                setState('correct');
+                if (nextOnCheck) {
+                    gotoNext();
+                }
+                return;
+            }
+
+            const isCorrect = answers.some(answer => answer === userInput);
+
+            if (isCorrect) {
+                setUserAnswer(userInput);
                 onCorrect?.();
                 setState('correct');
                 if (nextOnCheck) {
@@ -78,7 +99,7 @@ export default function QuestionCard({
                 setState('incorrect');
             }
         },
-        [state, answer, nextOnCheck, gotoNext, onCorrect, onMistake],
+        [state, answers, nextOnCheck, gotoNext, onCorrect, onMistake],
     );
 
     return (
@@ -133,14 +154,41 @@ export default function QuestionCard({
                 </Button>
             </div>
             {state !== 'unchecked' ? (
-                <p
-                    className={classNames([
-                        'text-4xl font-bold',
+                <div className="text-center">
+                    <p className={classNames([
+                        'text-2xl font-bold mb-3',
                         state === 'correct' ? 'text-green-500' : 'text-red-500',
-                    ])}
-                >
-                    {answer}
-                </p>
+                    ])}>
+                        {state === 'correct' ? 'Correct!' : 'Incorrect'}
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {answers.map((answer) => {
+                            const isError = answer.startsWith('[Error:');
+                            return (
+                                <span
+                                    key={answer}
+                                    className={classNames([
+                                        'px-3 py-1 rounded text-lg font-mono',
+                                        isError
+                                            ? 'bg-orange-600 text-white'
+                                            : state === 'correct' && answer === userAnswer
+                                                ? 'bg-green-600 text-white'
+                                                : state === 'correct'
+                                                    ? 'bg-gray-600 text-gray-300'
+                                                    : 'bg-red-600 text-white'
+                                    ])}
+                                >
+                                    {isError ? '⚠️ Conjugation Error' : answer}
+                                </span>
+                            );
+                        })}
+                    </div>
+                    {answers.some(answer => answer.startsWith('[Error:')) && (
+                        <p className="text-sm text-orange-400 mt-2">
+                            Conjugation error occurred. Training continued automatically.
+                        </p>
+                    )}
+                </div>
             ) : null}
         </form>
     );

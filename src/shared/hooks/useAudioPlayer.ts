@@ -50,6 +50,34 @@ export default function useAudioPlayer() {
                 });
 
                 return ehnhancePromise(promise, () => speechSynthesis.cancel());
+            },
+            readJapaneseText(text: string, slowMode = true) {
+                const promise = new Promise<void>((resolve, reject) => {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = "ja-JP";
+                    utterance.rate = slowMode ? 0.7 : 0.9; // Slower for better clarity
+                    utterance.pitch = 1.1; // Slightly higher pitch for better clarity
+                    utterance.volume = 0.9; // Slightly lower volume to avoid distortion
+
+                    // Try to get a better Japanese voice if available
+                    const voices = speechSynthesis.getVoices();
+                    const japaneseVoices = voices.filter(voice =>
+                        voice.lang.startsWith('ja') &&
+                        (voice.name.includes('Google') || voice.name.includes('Siri') || voice.name.includes('Alex'))
+                    );
+
+                    if (japaneseVoices.length > 0) {
+                        // Prefer Google, Siri, or Alexa voices as they tend to be better quality
+                        utterance.voice = japaneseVoices[0];
+                    }
+
+                    utterance.onend = () => resolve();
+                    utterance.onerror = (event) => reject(event.error);
+
+                    speechSynthesis.speak(utterance);
+                });
+
+                return ehnhancePromise(promise, () => speechSynthesis.cancel());
             }
         };
     }, []);
