@@ -2,6 +2,7 @@ import QuizPage from '@features/quiz/components/QuizPage';
 import VerbConjugator from '@features/verb-conjugation/components/VerbConjugator';
 import VocabListPage from '@features/vocabulary/components/VocabListPage';
 import HomophonePage from '@features/homophones/components/HomophonePage';
+import MeaningGroupsPage from '@features/meaning-groups/components/MeaningGroupsPage';
 import { ToastProvider } from '@shared/components/ToastContext';
 import type { Subject } from '@shared/types/types';
 import { RouterProvider, createBrowserRouter } from 'react-router';
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
             {
                 path: 'homophones',
                 element: <HomophonePage />,
+            },
+            {
+                path: 'meaning-groups',
+                element: <MeaningGroupsPage />,
             },
             {
                 path: 'verb-conjugation',

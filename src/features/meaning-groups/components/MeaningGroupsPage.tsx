@@ -36,72 +36,51 @@ function getSrsStageColor(srsStage: number): string {
     }
 }
 
-// Vokal-Zeilen für ähnliche Lesungen
-const vowelGroups: Record<string, string[]> = {
-    'a': ['あ', 'か', 'さ', 'た', 'な', 'は', 'ま', 'や', 'ら', 'わ', 'が', 'ざ', 'だ', 'ば', 'ぱ'],
-    'i': ['い', 'き', 'し', 'ち', 'に', 'ひ', 'み', 'り', 'ぎ', 'じ', 'ぢ', 'び', 'ぴ'],
-    'u': ['う', 'く', 'す', 'つ', 'ぬ', 'ふ', 'む', 'ゆ', 'る', 'ぐ', 'ず', 'づ', 'ぶ', 'ぷ'],
-    'e': ['え', 'け', 'せ', 'て', 'ね', 'へ', 'め', 'れ', 'げ', 'ぜ', 'で', 'べ', 'ぺ'],
-    'o': ['お', 'こ', 'そ', 'と', 'の', 'ほ', 'も', 'よ', 'ろ', 'を', 'ご', 'ぞ', 'ど', 'ぼ', 'ぽ']
-};
-
-function getVowelGroup(kana: string): string | null {
-    for (const [vowel, kanas] of Object.entries(vowelGroups)) {
-        if (kanas.includes(kana)) {
-            return vowel;
-        }
-    }
-    return null;
+function normalizeMeaning(meaning: string): string {
+    // Normalisiere Bedeutungen für bessere Gruppierung
+    return meaning
+        .toLowerCase()
+        .trim()
+        .replace(/[.,;:!?]/g, '') // Entferne Satzzeichen
+        .replace(/\s+/g, ' '); // Normalisiere Leerzeichen
 }
 
-function areSimilarReadings(reading1: string, reading2: string): boolean {
-    // Identische Lesungen
-    if (reading1 === reading2) return true;
+function areSimilarMeanings(meaning1: string, meaning2: string): boolean {
+    const norm1 = normalizeMeaning(meaning1);
+    const norm2 = normalizeMeaning(meaning2);
 
-    const len1 = reading1.length;
-    const len2 = reading2.length;
+    // Identische Bedeutungen
+    if (norm1 === norm2) return true;
 
-    // Ähnliche Lesungen müssen die gleiche Anzahl Kana haben und mindestens 3 Kana lang sein
-    if (len1 !== len2 || len1 < 3) return false;
+    // Prüfe auf gemeinsame Wörter
+    const words1 = norm1.split(' ');
+    const words2 = norm2.split(' ');
 
-    // Prüfe auf ähnliche Vokale - nur ein Kana darf sich unterscheiden
-    let differences = 0;
-    for (let i = 0; i < len1; i++) {
-        const char1 = reading1[i];
-        const char2 = reading2[i];
+    // Mindestens 50% der Wörter müssen übereinstimmen
+    const commonWords = words1.filter(word => words2.includes(word));
+    const minWords = Math.min(words1.length, words2.length);
 
-        if (char1 !== char2) {
-            const vowel1 = getVowelGroup(char1);
-            const vowel2 = getVowelGroup(char2);
+    if (minWords === 0) return false;
 
-            // Nur ein Unterschied erlaubt, und nur wenn es sich um verschiedene Vokale handelt
-            if (vowel1 && vowel2 && vowel1 !== vowel2) {
-                differences++;
-                if (differences > 1) return false;
-            } else {
-                return false;
-            }
-        }
-    }
-    return differences === 1;
+    return commonWords.length / minWords >= 0.5;
 }
 
-function groupSimilarReadings(readings: string[]): string[][] {
+function groupSimilarMeanings(meanings: string[]): string[][] {
     const groups: string[][] = [];
     const used = new Set<string>();
 
-    for (const reading of readings) {
-        if (used.has(reading)) continue;
+    for (const meaning of meanings) {
+        if (used.has(meaning)) continue;
 
-        const group = [reading];
-        used.add(reading);
+        const group = [meaning];
+        used.add(meaning);
 
-        for (const otherReading of readings) {
-            if (used.has(otherReading)) continue;
+        for (const otherMeaning of meanings) {
+            if (used.has(otherMeaning)) continue;
 
-            if (areSimilarReadings(reading, otherReading)) {
-                group.push(otherReading);
-                used.add(otherReading);
+            if (areSimilarMeanings(meaning, otherMeaning)) {
+                group.push(otherMeaning);
+                used.add(otherMeaning);
             }
         }
 
@@ -113,38 +92,40 @@ function groupSimilarReadings(readings: string[]): string[][] {
     return groups;
 }
 
-type HomophoneGroup = {
-    reading: string;
+type MeaningGroup = {
+    meaning: string;
     subjects: Subject[];
     count: number;
 };
 
-export default function HomophonePage() {
+export default function MeaningGroupsPage() {
     const subjects = useRouteLoaderData('root') as Subject[];
-    const [includeSimilarReadings, setIncludeSimilarReadings] = useState(false);
+    const [includeSimilarMeanings, setIncludeSimilarMeanings] = useState(false);
 
-    const homophoneGroups = useMemo(() => {
-        if (includeSimilarReadings) {
-            // Sammle alle Lesungen
-            const allReadings = new Set<string>();
+    const meaningGroups = useMemo(() => {
+        if (includeSimilarMeanings) {
+            // Sammle alle primären Bedeutungen
+            const allMeanings = new Set<string>();
             for (const subject of subjects) {
-                for (const reading of subject.data.readings) {
-                    allReadings.add(reading.reading);
+                for (const meaning of subject.data.meanings) {
+                    if (meaning.primary) {
+                        allMeanings.add(meaning.meaning);
+                    }
                 }
             }
 
-            // Gruppiere ähnliche Lesungen
-            const similarGroups = groupSimilarReadings(Array.from(allReadings));
+            // Gruppiere ähnliche Bedeutungen
+            const similarGroups = groupSimilarMeanings(Array.from(allMeanings));
 
-            // Erstelle Homophone-Gruppen basierend auf ähnlichen Lesungen
-            const homophoneGroups: HomophoneGroup[] = [];
+            // Erstelle Bedeutungs-Gruppen basierend auf ähnlichen Bedeutungen
+            const meaningGroups: MeaningGroup[] = [];
 
-            for (const readingGroup of similarGroups) {
+            for (const meaningGroup of similarGroups) {
                 const groupSubjects: Subject[] = [];
 
-                for (const reading of readingGroup) {
+                for (const meaning of meaningGroup) {
                     for (const subject of subjects) {
-                        if (subject.data.readings.some(r => r.reading === reading)) {
+                        if (subject.data.meanings.some(m => m.primary && m.meaning === meaning)) {
                             if (!groupSubjects.find(s => s.id === subject.id)) {
                                 groupSubjects.push(subject);
                             }
@@ -153,95 +134,97 @@ export default function HomophonePage() {
                 }
 
                 if (groupSubjects.length > 1) {
-                    homophoneGroups.push({
-                        reading: readingGroup.join(' / '),
+                    meaningGroups.push({
+                        meaning: meaningGroup.join(' / '),
                         subjects: groupSubjects,
                         count: groupSubjects.length,
                     });
                 }
             }
 
-            return homophoneGroups.sort((a, b) => {
+            return meaningGroups.sort((a, b) => {
                 if (b.count !== a.count) {
                     return b.count - a.count;
                 }
-                return b.reading.length - a.reading.length;
+                return b.meaning.length - a.meaning.length;
             });
         }
 
-        // Originale Logik: Gruppiere Vokabeln nach exakter Lesung
-        const readingMap = new Map<string, Subject[]>();
+        // Originale Logik: Gruppiere Vokabeln nach exakter Bedeutung
+        const meaningMap = new Map<string, Subject[]>();
 
         for (const subject of subjects) {
-            for (const reading of subject.data.readings) {
-                const readingKey = reading.reading;
-                if (!readingMap.has(readingKey)) {
-                    readingMap.set(readingKey, []);
-                }
-                const existingSubjects = readingMap.get(readingKey);
-                if (existingSubjects) {
-                    existingSubjects.push(subject);
+            for (const meaning of subject.data.meanings) {
+                if (meaning.primary) {
+                    const meaningKey = meaning.meaning;
+                    if (!meaningMap.has(meaningKey)) {
+                        meaningMap.set(meaningKey, []);
+                    }
+                    const existingSubjects = meaningMap.get(meaningKey);
+                    if (existingSubjects) {
+                        existingSubjects.push(subject);
+                    }
                 }
             }
         }
 
-        // Filtere nur Gruppen mit mehr als einem Vokabel (echte Homophone)
-        const homophoneGroups: HomophoneGroup[] = Array.from(readingMap.entries())
+        // Filtere nur Gruppen mit mehr als einem Vokabel
+        const meaningGroups: MeaningGroup[] = Array.from(meaningMap.entries())
             .filter(([_, subjects]) => subjects.length > 1)
-            .map(([reading, subjects]) => ({
-                reading,
+            .map(([meaning, subjects]) => ({
+                meaning,
                 subjects,
                 count: subjects.length,
             }))
-            // Sortiere nach Anzahl der Vokabeln (absteigend), dann nach Länge der Lesung (absteigend)
+            // Sortiere nach Anzahl der Vokabeln (absteigend), dann nach Länge der Bedeutung (absteigend)
             .sort((a, b) => {
                 if (b.count !== a.count) {
                     return b.count - a.count;
                 }
-                return b.reading.length - a.reading.length;
+                return b.meaning.length - a.meaning.length;
             });
 
-        return homophoneGroups;
-    }, [subjects, includeSimilarReadings]);
+        return meaningGroups;
+    }, [subjects, includeSimilarMeanings]);
 
-    const totalHomophones = useMemo(() => {
-        return homophoneGroups.reduce((sum, group) => sum + group.count, 0);
-    }, [homophoneGroups]);
+    const totalMeanings = useMemo(() => {
+        return meaningGroups.reduce((sum, group) => sum + group.count, 0);
+    }, [meaningGroups]);
 
     return (
         <div className="space-y-6 p-4">
             <div className="text-center">
-                <h2 className="text-2xl font-bold text-stone-100 mb-2">Homophone</h2>
+                <h2 className="text-2xl font-bold text-stone-100 mb-2">Bedeutungsgruppen</h2>
                 <p className="text-stone-300">
-                    Vokabeln mit gleicher Lesung, gruppiert nach Lesung und sortiert nach Anzahl
+                    Vokabeln mit gleicher oder ähnlicher Bedeutung, gruppiert nach Bedeutung und sortiert nach Anzahl
                 </p>
                 <p className="text-sm text-stone-400 mt-2">
-                    <strong>{homophoneGroups.length}</strong> Homophone-Gruppen mit insgesamt{' '}
-                    <strong>{totalHomophones}</strong> Vokabeln
+                    <strong>{meaningGroups.length}</strong> Bedeutungsgruppen mit insgesamt{' '}
+                    <strong>{totalMeanings}</strong> Vokabeln
                 </p>
             </div>
 
             <div className="flex justify-center">
                 <Input
                     type="checkbox"
-                    checked={includeSimilarReadings}
-                    onChange={(e) => setIncludeSimilarReadings(e.target.checked)}
-                    label="Ähnliche Lesungen einschließen (mind. 3 Kana, gleiche Länge, nur ein Kana aus anderer Vokal-Zeile)"
+                    checked={includeSimilarMeanings}
+                    onChange={(e) => setIncludeSimilarMeanings(e.target.checked)}
+                    label="Ähnliche Bedeutungen einschließen (mind. 50% gemeinsame Wörter)"
                 />
             </div>
 
-            {homophoneGroups.length === 0 ? (
+            {meaningGroups.length === 0 ? (
                 <div className="text-center py-8">
-                    <p className="text-stone-400">Keine Homophone gefunden.</p>
+                    <p className="text-stone-400">Keine Bedeutungsgruppen gefunden.</p>
                 </div>
             ) : (
                 <div className="space-y-6">
-                    {homophoneGroups.map((group) => (
-                        <div key={group.reading} className="bg-stone-800 border border-stone-600 rounded-lg shadow-sm">
+                    {meaningGroups.map((group) => (
+                        <div key={group.meaning} className="bg-stone-800 border border-stone-600 rounded-lg shadow-sm">
                             <div className="bg-stone-700 px-4 py-3 border-b border-stone-600">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-lg font-semibold text-stone-100">
-                                        {group.reading}
+                                        {group.meaning}
                                     </h3>
                                     <span className="bg-amber-600 text-stone-100 text-sm font-medium px-2.5 py-0.5 rounded-full">
                                         {group.count} Vokabeln
