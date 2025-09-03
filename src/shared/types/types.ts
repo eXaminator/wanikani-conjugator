@@ -25,4 +25,11 @@ export type Subject = {
             };
         }[];
     };
+    assignment?: {
+        subject_id: number;
+        srs_stage: number;
+        available_at: string | null;
+        passed_at: string | null;
+        burned_at: string | null;
+    } | null;
 };

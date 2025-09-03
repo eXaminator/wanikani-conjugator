@@ -1,6 +1,7 @@
 import QuizPage from '@features/quiz/components/QuizPage';
 import VerbConjugator from '@features/verb-conjugation/components/VerbConjugator';
 import VocabListPage from '@features/vocabulary/components/VocabListPage';
+import HomophonePage from '@features/homophones/components/HomophonePage';
 import { ToastProvider } from '@shared/components/ToastContext';
 import type { Subject } from '@shared/types/types';
 import { RouterProvider, createBrowserRouter } from 'react-router';
@@ -11,6 +12,10 @@ import ListeningPage from './features/listening/components/ListeningPage';
 interface Assignment {
     data: {
         subject_id: number;
+        srs_stage: number;
+        available_at: string | null;
+        passed_at: string | null;
+        burned_at: string | null;
     };
 }
 
@@ -35,20 +40,30 @@ async function* loadAllPages(initialUrl: string, token: string) {
 }
 
 async function loadAllSubjects(token: string) {
-    const subjectIds: number[] = [];
+    const assignments: Assignment[] = [];
     for await (const data of loadAllPages(
         'https://api.wanikani.com/v2/assignments?subject_types=vocabulary&started=true',
         token,
     )) {
-        subjectIds.push(...data.data.map((assignment: Assignment) => assignment.data.subject_id));
+        assignments.push(...data.data);
     }
 
+    const subjectIds = assignments.map((assignment) => assignment.data.subject_id);
     const subjects: Subject[] = [];
     for await (const data of loadAllPages(`https://api.wanikani.com/v2/subjects?ids=${subjectIds.join(',')}`, token)) {
         subjects.push(...data.data);
     }
 
-    return subjects;
+    // Füge Assignment-Daten zu den Subjects hinzu
+    const subjectsWithAssignments = subjects.map((subject) => {
+        const assignment = assignments.find((a) => a.data.subject_id === subject.id);
+        return {
+            ...subject,
+            assignment: assignment?.data || null,
+        };
+    });
+
+    return subjectsWithAssignments;
 }
 
 const router = createBrowserRouter([
@@ -73,6 +88,10 @@ const router = createBrowserRouter([
             {
                 path: 'list',
                 element: <VocabListPage />,
+            },
+            {
+                path: 'homophones',
+                element: <HomophonePage />,
             },
             {
                 path: 'verb-conjugation',

@@ -15,6 +15,9 @@ export default function RootRoute() {
                             <NavLink to="/list">Vokabelliste</NavLink>
                         </li>
                         <li>
+                            <NavLink to="/homophones">Homophone</NavLink>
+                        </li>
+                        <li>
                             <NavLink to="/verb-conjugation">Verb-Conjugation</NavLink>
                         </li>
                         <li>
