@@ -1,6 +1,7 @@
 import type { Subject } from '@shared/types/types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouteLoaderData } from 'react-router';
+import Input from '@shared/components/Input';
 
 function getSrsStageName(srsStage: number): string {
     switch (srsStage) {
@@ -34,6 +35,83 @@ function getSrsStageColor(srsStage: number): string {
     }
 }
 
+// Vokal-Zeilen für ähnliche Lesungen
+const vowelGroups: Record<string, string[]> = {
+    'a': ['あ', 'か', 'さ', 'た', 'な', 'は', 'ま', 'や', 'ら', 'わ', 'が', 'ざ', 'だ', 'ば', 'ぱ'],
+    'i': ['い', 'き', 'し', 'ち', 'に', 'ひ', 'み', 'り', 'ぎ', 'じ', 'ぢ', 'び', 'ぴ'],
+    'u': ['う', 'く', 'す', 'つ', 'ぬ', 'ふ', 'む', 'ゆ', 'る', 'ぐ', 'ず', 'づ', 'ぶ', 'ぷ'],
+    'e': ['え', 'け', 'せ', 'て', 'ね', 'へ', 'め', 'れ', 'げ', 'ぜ', 'で', 'べ', 'ぺ'],
+    'o': ['お', 'こ', 'そ', 'と', 'の', 'ほ', 'も', 'よ', 'ろ', 'を', 'ご', 'ぞ', 'ど', 'ぼ', 'ぽ']
+};
+
+function getVowelGroup(kana: string): string | null {
+    for (const [vowel, kanas] of Object.entries(vowelGroups)) {
+        if (kanas.includes(kana)) {
+            return vowel;
+        }
+    }
+    return null;
+}
+
+function areSimilarReadings(reading1: string, reading2: string): boolean {
+    // Identische Lesungen
+    if (reading1 === reading2) return true;
+
+    const len1 = reading1.length;
+    const len2 = reading2.length;
+
+    // Ähnliche Lesungen müssen die gleiche Anzahl Kana haben und mindestens 3 Kana lang sein
+    if (len1 !== len2 || len1 < 3) return false;
+
+    // Prüfe auf ähnliche Vokale - nur ein Kana darf sich unterscheiden
+    let differences = 0;
+    for (let i = 0; i < len1; i++) {
+        const char1 = reading1[i];
+        const char2 = reading2[i];
+
+        if (char1 !== char2) {
+            const vowel1 = getVowelGroup(char1);
+            const vowel2 = getVowelGroup(char2);
+
+            // Nur ein Unterschied erlaubt, und nur wenn es sich um verschiedene Vokale handelt
+            if (vowel1 && vowel2 && vowel1 !== vowel2) {
+                differences++;
+                if (differences > 1) return false;
+            } else {
+                return false;
+            }
+        }
+    }
+    return differences === 1;
+}
+
+function groupSimilarReadings(readings: string[]): string[][] {
+    const groups: string[][] = [];
+    const used = new Set<string>();
+
+    for (const reading of readings) {
+        if (used.has(reading)) continue;
+
+        const group = [reading];
+        used.add(reading);
+
+        for (const otherReading of readings) {
+            if (used.has(otherReading)) continue;
+
+            if (areSimilarReadings(reading, otherReading)) {
+                group.push(otherReading);
+                used.add(otherReading);
+            }
+        }
+
+        if (group.length > 1) {
+            groups.push(group);
+        }
+    }
+
+    return groups;
+}
+
 type HomophoneGroup = {
     reading: string;
     subjects: Subject[];
@@ -42,9 +120,55 @@ type HomophoneGroup = {
 
 export default function HomophonePage() {
     const subjects = useRouteLoaderData('root') as Subject[];
+    const [includeSimilarReadings, setIncludeSimilarReadings] = useState(false);
 
     const homophoneGroups = useMemo(() => {
-        // Gruppiere Vokabeln nach ihrer Lesung
+        if (includeSimilarReadings) {
+            // Sammle alle Lesungen
+            const allReadings = new Set<string>();
+            for (const subject of subjects) {
+                for (const reading of subject.data.readings) {
+                    allReadings.add(reading.reading);
+                }
+            }
+
+            // Gruppiere ähnliche Lesungen
+            const similarGroups = groupSimilarReadings(Array.from(allReadings));
+
+            // Erstelle Homophone-Gruppen basierend auf ähnlichen Lesungen
+            const homophoneGroups: HomophoneGroup[] = [];
+
+            for (const readingGroup of similarGroups) {
+                const groupSubjects: Subject[] = [];
+
+                for (const reading of readingGroup) {
+                    for (const subject of subjects) {
+                        if (subject.data.readings.some(r => r.reading === reading)) {
+                            if (!groupSubjects.find(s => s.id === subject.id)) {
+                                groupSubjects.push(subject);
+                            }
+                        }
+                    }
+                }
+
+                if (groupSubjects.length > 1) {
+                    homophoneGroups.push({
+                        reading: readingGroup.join(' / '),
+                        subjects: groupSubjects,
+                        count: groupSubjects.length,
+                    });
+                }
+            }
+
+            return homophoneGroups.sort((a, b) => {
+                if (b.count !== a.count) {
+                    return b.count - a.count;
+                }
+                return b.reading.length - a.reading.length;
+            });
+        }
+
+        // Originale Logik: Gruppiere Vokabeln nach exakter Lesung
         const readingMap = new Map<string, Subject[]>();
 
         for (const subject of subjects) {
@@ -77,7 +201,7 @@ export default function HomophonePage() {
             });
 
         return homophoneGroups;
-    }, [subjects]);
+    }, [subjects, includeSimilarReadings]);
 
     const totalHomophones = useMemo(() => {
         return homophoneGroups.reduce((sum, group) => sum + group.count, 0);
@@ -94,6 +218,15 @@ export default function HomophonePage() {
                     <strong>{homophoneGroups.length}</strong> Homophone-Gruppen mit insgesamt{' '}
                     <strong>{totalHomophones}</strong> Vokabeln
                 </p>
+            </div>
+
+            <div className="flex justify-center">
+                <Input
+                    type="checkbox"
+                    checked={includeSimilarReadings}
+                    onChange={(e) => setIncludeSimilarReadings(e.target.checked)}
+                    label="Ähnliche Lesungen einschließen (mind. 3 Kana, gleiche Länge, nur ein Kana aus anderer Vokal-Zeile)"
+                />
             </div>
 
             {homophoneGroups.length === 0 ? (
