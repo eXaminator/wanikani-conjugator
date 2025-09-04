@@ -192,25 +192,27 @@ export default function MeaningGroupsPage() {
     }, [meaningGroups]);
 
     return (
-        <div className="space-y-6 p-4">
+        <div className="space-y-4 p-2 sm:p-4 max-w-2xl mx-auto">
             <div className="text-center">
-                <h2 className="text-2xl font-bold text-stone-100 mb-2">Bedeutungsgruppen</h2>
-                <p className="text-stone-300">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-100 mb-2">Bedeutungsgruppen</h2>
+                <p className="text-sm sm:text-base text-stone-300">
                     Vokabeln mit gleicher oder ähnlicher Bedeutung, gruppiert nach Bedeutung und sortiert nach Anzahl
                 </p>
-                <p className="text-sm text-stone-400 mt-2">
+                <p className="text-xs sm:text-sm text-stone-400 mt-2">
                     <strong>{meaningGroups.length}</strong> Bedeutungsgruppen mit insgesamt{' '}
                     <strong>{totalMeanings}</strong> Vokabeln
                 </p>
             </div>
 
-            <div className="flex justify-center">
-                <Input
-                    type="checkbox"
-                    checked={includeSimilarMeanings}
-                    onChange={(e) => setIncludeSimilarMeanings(e.target.checked)}
-                    label="Ähnliche Bedeutungen einschließen (mind. 50% gemeinsame Wörter)"
-                />
+            <div className="flex justify-center px-2">
+                <div className="max-w-xs sm:max-w-md">
+                    <Input
+                        type="checkbox"
+                        checked={includeSimilarMeanings}
+                        onChange={(e) => setIncludeSimilarMeanings(e.target.checked)}
+                        label="Ähnliche Bedeutungen einschließen (mind. 50% gemeinsame Wörter)"
+                    />
+                </div>
             </div>
 
             {meaningGroups.length === 0 ? (
@@ -231,97 +233,178 @@ export default function MeaningGroupsPage() {
                                     </span>
                                 </div>
                             </div>
-                            <div className="p-4">
-                                <table className="min-w-full divide-y divide-stone-600">
-                                    <thead className="bg-stone-700">
-                                        <tr>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
-                                                Zeichen
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
-                                                Lesungen
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
-                                                Bedeutungen
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
-                                                Wortarten
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
-                                                Level
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
-                                                Lernstufe
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-stone-800 divide-y divide-stone-600">
-                                        {group.subjects.map((subject) => (
-                                            <tr key={subject.id} className="hover:bg-stone-700 transition-colors duration-200">
-                                                <td className="px-4 py-3 whitespace-nowrap font-medium text-stone-100">
-                                                    <a
-                                                        href={`https://www.wanikani.com/vocabulary/${subject.data.characters}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                                    >
-                                                        {subject.data.characters}
-                                                    </a>
-                                                </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-stone-200">
-                                                    {subject.data.readings.map((reading) => (
-                                                        <span key={`${subject.id}-${reading.reading}`} className="mr-2">
-                                                            {reading.reading}
-                                                            {reading.primary && (
-                                                                <span className="ml-1 text-xs text-amber-400 font-medium">
-                                                                    (primär)
+                            <div className="p-2 sm:p-4">
+                                {/* Desktop Table View */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-stone-600">
+                                        <thead className="bg-stone-700">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                    Zeichen
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                    Lesungen
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                    Bedeutungen
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                    Wortarten
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                    Level
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                    Lernstufe
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-stone-800 divide-y divide-stone-600">
+                                            {group.subjects.map((subject) => (
+                                                <tr key={subject.id} className="hover:bg-stone-700 transition-colors duration-200">
+                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap font-medium text-stone-100">
+                                                        <a
+                                                            href={`https://www.wanikani.com/vocabulary/${subject.data.characters}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                                                        >
+                                                            {subject.data.characters}
+                                                        </a>
+                                                    </td>
+                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-stone-200">
+                                                        {subject.data.readings.map((reading) => (
+                                                            <span key={`${subject.id}-${reading.reading}`} className="mr-2">
+                                                                {reading.reading}
+                                                                {reading.primary && (
+                                                                    <span className="ml-1 text-xs text-amber-400 font-medium">
+                                                                        (primär)
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        ))}
+                                                    </td>
+                                                    <td className="px-2 sm:px-4 py-3 text-stone-200">
+                                                        <Tooltip
+                                                            content={subject.data.meanings.map((meaning) =>
+                                                                `${meaning.meaning}${meaning.primary ? ' (primär)' : ''}`
+                                                            ).join(', ')}
+                                                        >
+                                                            <span className="cursor-help">
+                                                                {subject.data.meanings
+                                                                    .filter((meaning) => meaning.primary)
+                                                                    .map((meaning) => meaning.meaning)
+                                                                    .join(', ')}
+                                                            </span>
+                                                        </Tooltip>
+                                                    </td>
+                                                    <td className="px-2 sm:px-4 py-3 text-stone-200">
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {subject.data.parts_of_speech.map((pos) => (
+                                                                <span
+                                                                    key={pos}
+                                                                    className="inline-block bg-stone-600 text-stone-200 text-xs px-2 py-1 rounded-md"
+                                                                >
+                                                                    {pos}
                                                                 </span>
-                                                            )}
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-stone-400">
+                                                        {subject.data.level}
+                                                    </td>
+                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap">
+                                                        {subject.assignment ? (
+                                                            <span className={`inline-block text-stone-100 text-xs px-2 py-1 rounded-md ${getSrsStageColor(subject.assignment.srs_stage)}`}>
+                                                                {getSrsStageName(subject.assignment.srs_stage)}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-stone-500 text-xs">Nicht verfügbar</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Mobile Card View */}
+                                <div className="md:hidden space-y-1.5">
+                                    {group.subjects.map((subject) => (
+                                        <div key={subject.id} className="bg-stone-800 border border-stone-600 rounded p-1.5">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <a
+                                                    href={`https://www.wanikani.com/vocabulary/${subject.data.characters}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200 text-sm font-medium"
+                                                >
+                                                    {subject.data.characters}
+                                                </a>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-stone-400 text-xs">L{subject.data.level}</span>
+                                                    {subject.assignment ? (
+                                                        <span className={`inline-block text-stone-100 text-xs px-1 py-0.5 rounded ${getSrsStageColor(subject.assignment.srs_stage)}`}>
+                                                            {getSrsStageName(subject.assignment.srs_stage)}
                                                         </span>
-                                                    ))}
-                                                </td>
-                                                <td className="px-4 py-3 text-stone-200">
-                                                    <Tooltip
-                                                        content={subject.data.meanings.map((meaning) =>
-                                                            `${meaning.meaning}${meaning.primary ? ' (primär)' : ''}`
-                                                        ).join(', ')}
-                                                    >
-                                                        <span className="cursor-help">
-                                                            {subject.data.meanings
-                                                                .filter((meaning) => meaning.primary)
-                                                                .map((meaning) => meaning.meaning)
-                                                                .join(', ')}
-                                                        </span>
-                                                    </Tooltip>
-                                                </td>
-                                                <td className="px-4 py-3 text-stone-200">
-                                                    <div className="flex flex-wrap gap-1">
+                                                    ) : (
+                                                        <span className="text-stone-500 text-xs">N/A</span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1 text-xs">
+                                                <div>
+                                                    <span className="text-stone-400 font-medium">Lesungen:</span>
+                                                    <div className="mt-0.5">
+                                                        {subject.data.readings.map((reading) => (
+                                                            <span key={`${subject.id}-${reading.reading}`} className="mr-1 text-stone-200">
+                                                                {reading.reading}
+                                                                {reading.primary && (
+                                                                    <span className="ml-1 text-xs text-amber-400 font-medium">
+                                                                        (primär)
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <span className="text-stone-400 font-medium">Bedeutungen:</span>
+                                                    <div className="mt-0.5">
+                                                        <Tooltip
+                                                            content={subject.data.meanings.map((meaning) =>
+                                                                `${meaning.meaning}${meaning.primary ? ' (primär)' : ''}`
+                                                            ).join(', ')}
+                                                        >
+                                                            <span className="cursor-help text-stone-200">
+                                                                {subject.data.meanings
+                                                                    .filter((meaning) => meaning.primary)
+                                                                    .map((meaning) => meaning.meaning)
+                                                                    .join(', ')}
+                                                            </span>
+                                                        </Tooltip>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <span className="text-stone-400 font-medium">Wortarten:</span>
+                                                    <div className="mt-0.5 flex flex-wrap gap-0.5">
                                                         {subject.data.parts_of_speech.map((pos) => (
                                                             <span
                                                                 key={pos}
-                                                                className="inline-block bg-stone-600 text-stone-200 text-xs px-2 py-1 rounded-md"
+                                                                className="inline-block bg-stone-600 text-stone-200 text-xs px-1 py-0.5 rounded"
                                                             >
                                                                 {pos}
                                                             </span>
                                                         ))}
                                                     </div>
-                                                </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-stone-400">
-                                                    {subject.data.level}
-                                                </td>
-                                                <td className="px-4 py-3 whitespace-nowrap">
-                                                    {subject.assignment ? (
-                                                        <span className={`inline-block text-stone-100 text-xs px-2 py-1 rounded-md ${getSrsStageColor(subject.assignment.srs_stage)}`}>
-                                                            {getSrsStageName(subject.assignment.srs_stage)}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-stone-500 text-xs">Nicht verfügbar</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     ))}
