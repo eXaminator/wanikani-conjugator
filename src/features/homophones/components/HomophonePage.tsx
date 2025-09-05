@@ -209,7 +209,7 @@ export default function HomophonePage() {
     }, [homophoneGroups]);
 
     return (
-        <div className="space-y-4 p-2 sm:p-4 max-w-2xl mx-auto">
+        <div className="space-y-4 p-2 sm:p-4 max-w-2xl lg:max-w-4xl xl:max-w-6xl mx-auto">
             <div className="text-center">
                 <h2 className="text-xl sm:text-2xl font-bold text-stone-100 mb-2">Homophone</h2>
                 <p className="text-sm sm:text-base text-stone-300">
@@ -252,26 +252,26 @@ export default function HomophonePage() {
                             </div>
                             <div className="p-2 sm:p-4">
                                 {/* Desktop Table View */}
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-stone-600">
+                                <div className="hidden md:block">
+                                    <table className="w-full divide-y divide-stone-600 table-fixed">
                                         <thead className="bg-stone-700">
                                             <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                <th className="w-20 px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
                                                     Zeichen
                                                 </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                <th className="w-32 px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
                                                     Lesungen
                                                 </th>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
                                                     Bedeutungen
                                                 </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                <th className="w-32 px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
                                                     Wortarten
                                                 </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                <th className="w-16 px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
                                                     Level
                                                 </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
+                                                <th className="w-32 px-4 py-3 text-left text-xs font-medium text-stone-300 uppercase tracking-wider">
                                                     Lernstufe
                                                 </th>
                                             </tr>
@@ -279,7 +279,7 @@ export default function HomophonePage() {
                                         <tbody className="bg-stone-800 divide-y divide-stone-600">
                                             {group.subjects.map((subject) => (
                                                 <tr key={subject.id} className="hover:bg-stone-700 transition-colors duration-200">
-                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap font-medium text-stone-100">
+                                                    <td className="px-2 sm:px-4 py-3 font-medium text-stone-100">
                                                         <a
                                                             href={`https://www.wanikani.com/vocabulary/${subject.data.characters}`}
                                                             target="_blank"
@@ -289,7 +289,7 @@ export default function HomophonePage() {
                                                             {subject.data.characters}
                                                         </a>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-stone-200">
+                                                    <td className="px-2 sm:px-4 py-3 text-stone-200">
                                                         {subject.data.readings.map((reading) => (
                                                             <span key={`${subject.id}-${reading.reading}`} className="mr-2">
                                                                 {reading.reading}
@@ -307,7 +307,7 @@ export default function HomophonePage() {
                                                                 `${meaning.meaning}${meaning.primary ? ' (primär)' : ''}`
                                                             ).join(', ')}
                                                         >
-                                                            <span className="cursor-help">
+                                                            <span className="cursor-help break-words">
                                                                 {subject.data.meanings
                                                                     .filter((meaning) => meaning.primary)
                                                                     .map((meaning) => meaning.meaning)
@@ -327,10 +327,10 @@ export default function HomophonePage() {
                                                             ))}
                                                         </div>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-stone-400">
+                                                    <td className="px-2 sm:px-4 py-3 text-stone-400">
                                                         {subject.data.level}
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap">
+                                                    <td className="px-2 sm:px-4 py-3">
                                                         {subject.assignment ? (
                                                             <span className={`inline-block text-stone-100 text-xs px-2 py-1 rounded-md ${getSrsStageColor(subject.assignment.srs_stage)}`}>
                                                                 {getSrsStageName(subject.assignment.srs_stage)}
