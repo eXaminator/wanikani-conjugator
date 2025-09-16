@@ -12,7 +12,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ label, className, ...p
             <input
                 ref={ref}
                 className={classNames(
-                    'rounded border border-stone-500 px-3 py-1.5 text-sm text-stone-50 bg-stone-80 block w-full',
+                    'rounded border border-stone-500 px-3 py-1.5 text-sm text-stone-50 bg-stone-80 block',
                     'placeholder:text-stone-400',
                     'focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500',
                     'hover:border-stone-400 transition-colors duration-200',
@@ -20,7 +20,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ label, className, ...p
                 )}
                 {...props}
             />
-            {label && <span className="text-sm text-stone-200">{label}</span>}
+            {label && <span className="text-sm text-stone-200 flex-1">{label}</span>}
         </label>
     );
 });

@@ -205,14 +205,12 @@ export default function MeaningGroupsPage() {
             </div>
 
             <div className="flex justify-center px-2">
-                <div className="max-w-xs sm:max-w-md">
-                    <Input
-                        type="checkbox"
-                        checked={includeSimilarMeanings}
-                        onChange={(e) => setIncludeSimilarMeanings(e.target.checked)}
-                        label="Ähnliche Bedeutungen einschließen (mind. 50% gemeinsame Wörter)"
-                    />
-                </div>
+                <Input
+                    type="checkbox"
+                    checked={includeSimilarMeanings}
+                    onChange={(e) => setIncludeSimilarMeanings(e.target.checked)}
+                    label="Ähnliche Bedeutungen einschließen"
+                />
             </div>
 
             {meaningGroups.length === 0 ? (
