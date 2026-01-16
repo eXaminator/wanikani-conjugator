@@ -20,6 +20,14 @@ interface Assignment {
     };
 }
 
+function chunkArray<T>(array: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+}
+
 async function* loadAllPages(initialUrl: string, token: string) {
     let url = initialUrl;
     while (url) {
@@ -51,8 +59,16 @@ async function loadAllSubjects(token: string) {
 
     const subjectIds = assignments.map((assignment) => assignment.data.subject_id);
     const subjects: Subject[] = [];
-    for await (const data of loadAllPages(`https://api.wanikani.com/v2/subjects?ids=${subjectIds.join(',')}`, token)) {
-        subjects.push(...data.data);
+
+    // Batch subject IDs to avoid URL length limits
+    const batches = chunkArray(subjectIds, 100);
+    for (const batch of batches) {
+        for await (const data of loadAllPages(
+            `https://api.wanikani.com/v2/subjects?ids=${batch.join(',')}`,
+            token,
+        )) {
+            subjects.push(...data.data);
+        }
     }
 
     // Füge Assignment-Daten zu den Subjects hinzu
