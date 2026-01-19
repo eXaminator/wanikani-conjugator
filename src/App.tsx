@@ -5,6 +5,7 @@ import HomophonePage from '@features/homophones/components/HomophonePage';
 import MeaningGroupsPage from '@features/meaning-groups/components/MeaningGroupsPage';
 import { ToastProvider } from '@shared/components/ToastContext';
 import type { Subject } from '@shared/types/types';
+import { getCachedSubjects, setCachedSubjects } from '@shared/utils/subjectCache';
 import { RouterProvider, createBrowserRouter } from 'react-router';
 import RootRoute from './RootRoute';
 import LandingPage from './features/landingpage/LandingPage';
@@ -61,7 +62,7 @@ async function loadAllSubjects(token: string) {
     const subjects: Subject[] = [];
 
     // Batch subject IDs to avoid URL length limits
-    const batches = chunkArray(subjectIds, 100);
+    const batches = chunkArray(subjectIds, 80);
     for (const batch of batches) {
         for await (const data of loadAllPages(
             `https://api.wanikani.com/v2/subjects?ids=${batch.join(',')}`,
@@ -91,8 +92,14 @@ const router = createBrowserRouter([
         loader: async () => {
             const token = JSON.parse(window.localStorage.getItem('apiKey') ?? '""');
             if (!token) return [];
+
+            const cached = await getCachedSubjects();
+            if (cached) return cached;
+
             try {
-                return await loadAllSubjects(token);
+                const subjects = await loadAllSubjects(token);
+                await setCachedSubjects(subjects);
+                return subjects;
             } catch {
                 return [];
             }
